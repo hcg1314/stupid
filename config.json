@@ -1,13 +1,12 @@
 {
-  "peer_addr": "peer0.org1.example.com:7051",
-  "orderer_addr": "orderer.example.com:7050",
-  "channel": "mychannel",
-  "chaincode": "mycc",
-  "args": ["put", "key", "value"],
+  "peers": {"addr":"192.168.117.134:7051", "override_name":"peer0.org1.hcg.com"},
+  "orderers": {"addr":"192.168.117.134:7050", "override_name":"orderer.hcg.com"},
+  "channel": "titaniumchannel",
+  "chaincode": "ipfs",
   "mspid": "Org1MSP",
-  "private_key": "/path/to/private.key",
-  "sign_cert": "/path/to/sign.cert",
-  "tls_ca_certs": ["/path/to/peer/tls/ca/cert","/path/to/orderer/tls/ca/cert"],
+  "private_key": "E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/sign/private.key",
+  "sign_cert": "E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/sign/sign.cert",
+  "tls_ca_certs": ["E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/tls/tlsca.peer.cert","E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/tls/tlsca.orderer.cert"],
   "num_of_conn": 20,
   "client_per_conn": 40
 }

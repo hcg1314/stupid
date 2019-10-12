@@ -13,8 +13,8 @@ type Observer struct {
 	signal chan error
 }
 
-func CreateObserver(addr, channel string, crypto *Crypto) *Observer {
-	deliverer, err := CreateDeliverFilteredClient(addr, crypto.TLSCACerts)
+func CreateObserver(node Node, channel string, crypto *Crypto) *Observer {
+	deliverer, err := CreateDeliverFilteredClient(node, crypto.TLSCACerts)
 	if err != nil {
 		panic(err)
 	}

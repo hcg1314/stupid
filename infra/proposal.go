@@ -3,14 +3,53 @@ package infra
 import (
 	"bytes"
 	"math"
+	"math/rand"
+	"sync"
+	"time"
 
-	"github.com/golang/protobuf/proto"
+	"github.com/gogo/protobuf/proto"
 	"github.com/hyperledger/fabric/protos/common"
 	"github.com/hyperledger/fabric/protos/orderer"
 	"github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
 	"github.com/pkg/errors"
 )
+
+var kinds []uint8
+var bases []int
+const (
+	sliceNum = 8
+	dataLen = 1024*1024
+)
+
+func init() {
+	kinds = []uint8{48,49,50,51,52,53,54,55,56,57,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122}
+	bases = make([]int, sliceNum)
+}
+
+func InitBase(nLen int) {
+	for i := 0; i < sliceNum; i++ {
+		bases[i] = nLen/ sliceNum * i
+	}
+}
+
+func getFileData() []byte {
+	data := make([]byte, dataLen)
+	w := sync.WaitGroup{}
+	w.Add(sliceNum)
+	for s := 0; s < sliceNum; s++ {
+		go func(b int) {
+			r := rand.New(rand.NewSource(time.Now().UnixNano()))
+			sliceLen := b + dataLen/sliceNum
+			for i := b; i < sliceLen; i++ {
+				data[i] = kinds[r.Intn(62)]
+			}
+			w.Done()
+		}(bases[s])
+	}
+	w.Wait()
+	return data
+}
 
 func CreateProposal(signer *Crypto, channel, ccname string, args ...string) *peer.Proposal {
 	var argsInByte [][]byte
@@ -31,7 +70,10 @@ func CreateProposal(signer *Crypto, channel, ccname string, args ...string) *pee
 		panic(err)
 	}
 
-	prop, _, err := utils.CreateChaincodeProposal(common.HeaderType_ENDORSER_TRANSACTION, channel, invocation, creator)
+	transientMap := make(map[string][]byte)
+	transientMap["data"] = getFileData()
+
+	prop, _, err := utils.CreateChaincodeProposalWithTransient(common.HeaderType_ENDORSER_TRANSACTION, channel, invocation, creator, transientMap)
 	if err != nil {
 		panic(err)
 	}

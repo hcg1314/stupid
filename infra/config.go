@@ -8,12 +8,16 @@ import (
 	"github.com/hyperledger/fabric/protos/msp"
 )
 
+type Node struct {
+	Addr         string `json:"addr"`
+	OverrideName string `json:"override_name"`
+}
+
 type Config struct {
-	PeerAddr      string   `json:"peer_addr"`
-	OrdererAddr   string   `json:"orderer_addr"`
+	Peers         Node     `json:"peers"`
+	Orderers      Node     `json:"orderers"`
 	Channel       string   `json:"channel"`
 	Chaincode     string   `json:"chaincode"`
-	Args          []string `json:"args"`
 	MSPID         string   `json:"mspid"`
 	PrivateKey    string   `json:"private_key"`
 	SignCert      string   `json:"sign_cert"`

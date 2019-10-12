@@ -3,23 +3,23 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
-	"github.com/guoger/stupid/infra"
+	"github.com/hcg1314/stupid/infra"
 )
 
 func main() {
-	if len(os.Args) != 3 {
+/*	if len(os.Args) != 3 {
 		fmt.Printf("Usage: stupid config.json 500\n")
 		os.Exit(1)
-	}
+	}*/
 
 	config := infra.LoadConfig(os.Args[1])
-	N, err := strconv.Atoi(os.Args[2])
+	/*N, err := strconv.Atoi(os.Args[2])
 	if err != nil {
 		panic(err)
-	}
+	}*/
+	N := 100
 	crypto := config.LoadCrypto()
 
 	raw := make(chan *infra.Elecments, 100)
@@ -34,23 +34,29 @@ func main() {
 		go assember.StartIntegrator(processed, envs, done)
 	}
 
-	proposor := infra.CreateProposers(config.NumOfConn, config.ClientPerConn, config.PeerAddr, crypto)
+	proposor := infra.CreateProposers(config.NumOfConn, config.ClientPerConn, config.Peers, crypto)
 	proposor.Start(signed, processed, done)
 
-	broadcaster := infra.CreateBroadcasters(config.NumOfConn, config.OrdererAddr, crypto)
+	broadcaster := infra.CreateBroadcasters(config.NumOfConn, config.Orderers, crypto)
 	broadcaster.Start(envs, done)
 
-	observer := infra.CreateObserver(config.PeerAddr, config.Channel, crypto)
+	observer := infra.CreateObserver(config.Peers, config.Channel, crypto)
 
 	start := time.Now()
 	go observer.Start(N, start)
 
 	for i := 0; i < N; i++ {
+
 		prop := infra.CreateProposal(
 			crypto,
 			config.Channel,
 			config.Chaincode,
-			config.Args...,
+			"addFile",
+			fmt.Sprintf("%d", i),
+			fmt.Sprintf("%d", i),
+			"true",
+			"-1",
+			"-1",
 		)
 		raw <- &infra.Elecments{Proposal: prop}
 	}

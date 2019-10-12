@@ -17,10 +17,10 @@ type Proposers struct {
 	index  uint64
 }
 
-func CreateProposers(conn, client int, addr string, crypto *Crypto) *Proposers {
+func CreateProposers(conn, client int, node Node, crypto *Crypto) *Proposers {
 	ps := make([]*Proposer, conn)
 	for i := 0; i < conn; i++ {
-		ps[i] = CreateProposer(addr, crypto)
+		ps[i] = CreateProposer(node, crypto)
 	}
 
 	return &Proposers{workers: ps, client: client}
@@ -39,8 +39,8 @@ type Proposer struct {
 	e peer.EndorserClient
 }
 
-func CreateProposer(addr string, crypto *Crypto) *Proposer {
-	endorser, err := CreateEndorserClient(addr, crypto.TLSCACerts)
+func CreateProposer(node Node, crypto *Crypto) *Proposer {
+	endorser, err := CreateEndorserClient(node, crypto.TLSCACerts)
 	if err != nil {
 		panic(err)
 	}
@@ -53,8 +53,17 @@ func (p *Proposer) Start(signed, processed chan *Elecments, done <-chan struct{}
 		select {
 		case s := <-signed:
 			r, err := p.e.ProcessProposal(context.Background(), s.SignedProp)
-			if err != nil || r.Response.Status < 200 || r.Response.Status >= 400 {
-				fmt.Printf("Err processing proposal: %s, status: %d\n", err, r.Response.Status)
+			// err不为空时，r会为nil，r.Response会导致panic
+			if err != nil {
+				fmt.Printf("Err processing proposal, err: %v\n", err)
+				continue
+			}
+			if r == nil {
+				continue
+			}
+			// 消息投递到peer，背书异常，输出具体原因
+			if r.Response.Status < 200 || r.Response.Status >= 400 {
+				fmt.Printf("Err processing proposal: %v, status: %d\n", r.Response.Message, r.Response.Status)
 				continue
 			}
 
@@ -69,10 +78,10 @@ func (p *Proposer) Start(signed, processed chan *Elecments, done <-chan struct{}
 
 type Broadcasters []*Broadcaster
 
-func CreateBroadcasters(conn int, addr string, crypto *Crypto) Broadcasters {
+func CreateBroadcasters(conn int, node Node, crypto *Crypto) Broadcasters {
 	bs := make(Broadcasters, conn)
 	for i := 0; i < conn; i++ {
-		bs[i] = CreateBroadcaster(addr, crypto)
+		bs[i] = CreateBroadcaster(node, crypto)
 	}
 
 	return bs
@@ -89,8 +98,8 @@ type Broadcaster struct {
 	c orderer.AtomicBroadcast_BroadcastClient
 }
 
-func CreateBroadcaster(addr string, crypto *Crypto) *Broadcaster {
-	client, err := CreateBroadcastClient(addr, crypto.TLSCACerts)
+func CreateBroadcaster(node Node, crypto *Crypto) *Broadcaster {
+	client, err := CreateBroadcastClient(node, crypto.TLSCACerts)
 	if err != nil {
 		panic(err)
 	}
