@@ -36,10 +36,10 @@ func CreateObserver(node Node, channel string, crypto *Crypto) *Observer {
 	return &Observer{d: deliverer, signal: make(chan error, 10)}
 }
 
-func (o *Observer) Start(N int, now time.Time) {
+func (o *Observer) Start(N uint64, now time.Time) {
 	defer close(o.signal)
 
-	n := 0
+	var n uint64 = 0
 	for n < N {
 		r, err := o.d.Recv()
 		if err != nil {
@@ -47,7 +47,7 @@ func (o *Observer) Start(N int, now time.Time) {
 		}
 
 		fb := r.Type.(*peer.DeliverResponse_FilteredBlock)
-		n = n + len(fb.FilteredBlock.FilteredTransactions)
+		n = n + uint64(len(fb.FilteredBlock.FilteredTransactions))
 		fmt.Printf("Time %v\tBlock %d\tTx %d\n", time.Since(now), fb.FilteredBlock.Number, len(fb.FilteredBlock.FilteredTransactions))
 	}
 }

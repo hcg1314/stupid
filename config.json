@@ -1,12 +1,21 @@
 {
-  "peers": {"addr":"192.168.117.134:7051", "override_name":"peer0.org1.hcg.com"},
-  "orderers": {"addr":"192.168.117.134:7050", "override_name":"orderer.hcg.com"},
+  "peers": [
+    {"addr":"192.168.117.134:7051", "override_name":"peer0.org1.hcg.com"},
+    {"addr":"192.168.117.135:7051", "override_name":"peer0.org2.hcg.com"},
+    {"addr":"192.168.117.136:7051", "override_name":"peer0.org3.hcg.com"}
+  ],
+  "orderer": {"addr":"192.168.117.134:7050", "override_name":"orderer.hcg.com"},
   "channel": "titaniumchannel",
   "chaincode": "ipfs",
   "mspid": "Org1MSP",
   "private_key": "E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/sign/private.key",
   "sign_cert": "E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/sign/sign.cert",
-  "tls_ca_certs": ["E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/tls/tlsca.peer.cert","E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/tls/tlsca.orderer.cert"],
-  "num_of_conn": 20,
-  "client_per_conn": 40
+  "tls_ca_certs": [
+    "E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/tls/tlsca.org1.peer.cert",
+    "E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/tls/tlsca.org2.peer.cert",
+    "E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/tls/tlsca.org3.peer.cert",
+    "E:/03 Go/src/github.com/hcg1314/stupid/crypto-config/tls/tlsca.orderer.cert"
+  ],
+  "num_of_conn": 2,
+  "client_per_conn": 2
 }

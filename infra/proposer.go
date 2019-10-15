@@ -17,10 +17,14 @@ type Proposers struct {
 	index  uint64
 }
 
-func CreateProposers(conn, client int, node Node, crypto *Crypto) *Proposers {
-	ps := make([]*Proposer, conn)
-	for i := 0; i < conn; i++ {
-		ps[i] = CreateProposer(node, crypto)
+func CreateProposers(conn, client int, nodes []Node, crypto *Crypto) *Proposers {
+	ps := make([]*Proposer, conn*len(nodes))
+	index := 0
+	for _,node := range nodes {
+		for i := 0; i < conn; i++ {
+			ps[index] = CreateProposer(node, crypto)
+			index += 1
+		}
 	}
 
 	return &Proposers{workers: ps, client: client}

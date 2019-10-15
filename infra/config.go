@@ -14,8 +14,8 @@ type Node struct {
 }
 
 type Config struct {
-	Peers         Node     `json:"peers"`
-	Orderers      Node     `json:"orderers"`
+	Peers         []Node   `json:"peers"`
+	Orderer       Node     `json:"orderer"`
 	Channel       string   `json:"channel"`
 	Chaincode     string   `json:"chaincode"`
 	MSPID         string   `json:"mspid"`
