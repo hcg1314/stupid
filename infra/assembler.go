@@ -36,12 +36,16 @@ func (a *Assembler) sign(e *Elecments) *Elecments {
 	return e
 }
 
-func (a *Assembler) StartSigner(raw, signed chan *Elecments, done <-chan struct{}) {
+func (a *Assembler) StartSigner(raw chan *Elecments, signed []chan *Elecments, done <-chan struct{}) {
+	i,n := 0,len(signed) // 平均分流到不同的连接中
 	for {
+		if i >= n {
+			i = 0
+		}
 		select {
 		case r := <-raw:
-			signed <- a.sign(r)
-
+			signed[i] <- a.sign(r)
+			i++
 		case <-done:
 			return
 		}

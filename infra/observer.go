@@ -48,7 +48,7 @@ func (o *Observer) Start(N uint64, now time.Time) {
 
 		fb := r.Type.(*peer.DeliverResponse_FilteredBlock)
 		n = n + uint64(len(fb.FilteredBlock.FilteredTransactions))
-		fmt.Printf("Time %v\tBlock %d\tTx %d\n", time.Since(now), fb.FilteredBlock.Number, len(fb.FilteredBlock.FilteredTransactions))
+		fmt.Printf("Time %v\tBlock %d\tTx %d\tTotal %d\n", time.Since(now), fb.FilteredBlock.Number, len(fb.FilteredBlock.FilteredTransactions), n)
 	}
 }
 
