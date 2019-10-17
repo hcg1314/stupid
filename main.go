@@ -48,11 +48,12 @@ func initSpeedCtrl(speedCtrl []uint, speed uint) {
 }
 
 func outputStatistic(proposers *infra.Proposers) {
-	f, err := os.OpenFile("endorser-static.log", os.O_CREATE|os.O_RDWR, os.ModePerm)
+	f, err := os.OpenFile("endorser-static.log", os.O_RDWR|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		f = os.Stdout
-	}else{
-		defer f.Close()
+		f, err = os.OpenFile("endorser-static.log", os.O_RDWR|os.O_CREATE, os.ModePerm)
+		if err != nil {
+			f = os.Stdout
+		}
 	}
 	log1 := log.New(f,"", log.LstdFlags)
 	stat := time.NewTicker(time.Second)
@@ -155,11 +156,12 @@ func main() {
 	go outputStatistic(proposor)
 
 	go func() {
-		f, err := os.OpenFile("static.log", os.O_CREATE|os.O_RDWR, os.ModePerm)
+		f, err := os.OpenFile("static.log", os.O_RDWR|os.O_APPEND, os.ModePerm)
 		if err != nil {
-			f = os.Stdout
-		}else{
-			defer f.Close()
+			f, err = os.OpenFile("static.log", os.O_RDWR|os.O_CREATE, os.ModePerm)
+			if err != nil {
+				f = os.Stdout
+			}
 		}
 		log1 := log.New(f,"", log.LstdFlags)
 		stat := time.NewTicker(time.Second)
@@ -173,9 +175,7 @@ func main() {
 	}()
 
 	observer.Wait()
-	duration := time.Since(start)
 	close(done)
 
-	fmt.Printf("tx: %d, duration: %+v, tps: %f\n", TotalTransaction, duration, float64(TotalTransaction)/duration.Seconds())
 	os.Exit(0)
 }
