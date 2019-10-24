@@ -2,7 +2,7 @@ package infra
 
 import (
 	"bytes"
-	comm "github.com/hcg1314/stupid/assembler/basic"
+	"github.com/hcg1314/stupid/assembler/basic"
 	"math"
 	"math/rand"
 	"sync"
@@ -50,7 +50,7 @@ func getFileData() []byte {
 	return data
 }
 
-func CreateProposal(signer *comm.Crypto, channel, ccname string, args ...string) *peer.Proposal {
+func CreateProposal(signer *basic.Crypto, channel, ccname string, args ...string) *peer.Proposal {
 	var argsInByte [][]byte
 	for _, arg := range args {
 		argsInByte = append(argsInByte, []byte(arg))
@@ -80,7 +80,7 @@ func CreateProposal(signer *comm.Crypto, channel, ccname string, args ...string)
 	return prop
 }
 
-func SignProposal(prop *peer.Proposal, signer *comm.Crypto) (*peer.SignedProposal, error) {
+func SignProposal(prop *peer.Proposal, signer *basic.Crypto) (*peer.SignedProposal, error) {
 	propBytes, err := proto.Marshal(prop)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func SignProposal(prop *peer.Proposal, signer *comm.Crypto) (*peer.SignedProposa
 	return &peer.SignedProposal{ProposalBytes: propBytes, Signature: sig}, nil
 }
 
-func CreateSignedTx(proposal *peer.Proposal, signer *comm.Crypto, resps ...*peer.ProposalResponse) (*common.Envelope, error) {
+func CreateSignedTx(proposal *peer.Proposal, signer *basic.Crypto, resps ...*peer.ProposalResponse) (*common.Envelope, error) {
 	if len(resps) == 0 {
 		return nil, errors.New("at least one proposal response is required")
 	}
@@ -200,7 +200,7 @@ func CreateSignedTx(proposal *peer.Proposal, signer *comm.Crypto, resps ...*peer
 	return &common.Envelope{Payload: paylBytes, Signature: sig}, nil
 }
 
-func CreateSignedDeliverNewestEnv(ch string, signer *comm.Crypto) (*common.Envelope, error) {
+func CreateSignedDeliverNewestEnv(ch string, signer *basic.Crypto) (*common.Envelope, error) {
 	start := &orderer.SeekPosition{
 		Type: &orderer.SeekPosition_Newest{
 			Newest: &orderer.SeekNewest{},

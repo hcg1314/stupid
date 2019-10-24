@@ -3,7 +3,6 @@ package infra
 import (
 	"context"
 	"fmt"
-	"github.com/hcg1314/stupid/assembler"
 	"github.com/hcg1314/stupid/assembler/basic"
 	"github.com/hyperledger/fabric/protos/peer"
 )
@@ -32,7 +31,7 @@ type proposer struct {
 	clientNum int
 	last      Statistic
 	current   Statistic
-	signed    chan *assembler.Elements
+	signed    chan *Elements
 	result    chan int
 }
 
@@ -47,17 +46,17 @@ func CreateProposer(node basic.Node, crypto *basic.Crypto, clientNum int) *propo
 		node:      node,
 		clientNum: clientNum,
 		result:    make(chan int, 1000),
-		signed:    make(chan *assembler.Elements, 1000),
+		signed:    make(chan *Elements, 1000),
 	}
 	return p
 }
 
-func (p *proposer) Handle(e *assembler.Elements) error {
+func (p *proposer) Handle(e *Elements) error {
 	p.signed <- e
 	return nil
 }
 
-func (p *proposer) Start(processed chan *assembler.Elements) {
+func (p *proposer) Start(processed chan *Elements) {
 
 	go p.startCount()
 
@@ -66,7 +65,7 @@ func (p *proposer) Start(processed chan *assembler.Elements) {
 	}
 }
 
-func (p *proposer) startProposer(processed chan *assembler.Elements) {
+func (p *proposer) startProposer(processed chan *Elements) {
 	for {
 		select {
 		case s := <-p.signed:

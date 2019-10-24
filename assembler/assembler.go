@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/hcg1314/stupid/assembler/basic"
 	"github.com/hcg1314/stupid/assembler/infra"
-	"github.com/hyperledger/fabric/protos/common"
-	"github.com/hyperledger/fabric/protos/peer"
 	"time"
 )
 
@@ -13,15 +11,8 @@ const (
 	speedSliceNum = 5
 )
 
-type Elements struct {
-	Proposal   *peer.Proposal
-	SignedProp *peer.SignedProposal
-	Response   *peer.ProposalResponse
-	Envelope   *common.Envelope
-}
-
 type Assembler struct {
-	raw         chan *Elements
+	raw         chan *infra.Elements
 	config      *basic.Config
 	signer      *basic.Crypto
 	proposer    *infra.Dispatcher
