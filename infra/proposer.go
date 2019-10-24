@@ -13,12 +13,12 @@ type Proposers struct {
 	workers []*Proposer
 }
 
-func CreateProposers(conn, client int, nodes []Node, crypto *Crypto, signed []chan *Elecments) *Proposers {
+func CreateProposers(conn, client int, nodes []Node, crypto *Crypto, signed chan *Elecments) *Proposers {
 	ps := make([]*Proposer, conn*len(nodes))
 	index := 0
 	for _, node := range nodes {
 		for i := 0; i < conn; i++ {
-			ps[index] = CreateProposer(node, crypto, client, signed[index])
+			ps[index] = CreateProposer(node, crypto, client, signed)
 			index += 1
 		}
 	}

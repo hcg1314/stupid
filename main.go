@@ -71,7 +71,7 @@ func generateTransaction(crypto *infra.Crypto, config *infra.Config, raw chan *i
 	speedIndex := 0
 	remainder := TotalTransaction
 	for {
-		if speedIndex >= 5 {
+		if speedIndex >= SpeedSliceNum {
 			speedIndex = 0
 		}
 
@@ -124,25 +124,19 @@ func main() {
 	crypto := config.LoadCrypto()
 
 	raw := make(chan *infra.Elecments, 100)
-
-	num := len(config.Peers) * config.NumOfConn
-	signed := make([]chan*infra.Elecments, num)
-	for i := 0; i < num; i++{
-		// 每个tcp连接，创建一个管道
-		signed[i] = make(chan *infra.Elecments, 100)
-	}
+	signed := make(chan *infra.Elecments, 100)
 	processed := make(chan *infra.Elecments, 100)
 	envs := make(chan *infra.Elecments, 100)
 	done := make(chan struct{})
 
-	assember := &infra.Assembler{Signer: crypto}
+	assembler := &infra.Assembler{Signer: crypto}
 	for i := 0; i < 5; i++ {
-		go assember.StartSigner(raw, signed, done)   // sign proposal
-		go assember.StartIntegrator(processed, envs, done) // create signed tx
+		go assembler.StartSigner(raw, signed, done)         // sign proposal
+		go assembler.StartIntegrator(processed, envs, done) // create signed tx
 	}
 
-	proposor := infra.CreateProposers(config.NumOfConn, config.ClientPerConn, config.Peers, crypto, signed)
-	proposor.Start(processed, done)
+	proposers := infra.CreateProposers(config.NumOfConn, config.ClientPerConn, config.Peers, crypto, signed)
+	proposers.Start(processed, done)
 
 	infra.CreateBroadcasters(config.NumOfConn, config.Orderer, crypto).Start(envs, done)
 
@@ -153,7 +147,7 @@ func main() {
 
 	go generateTransaction(crypto, &config, raw)
 
-	go outputStatistic(proposor)
+	go outputStatistic(proposers)
 
 	go func() {
 		f, err := os.OpenFile("static.log", os.O_RDWR|os.O_APPEND, os.ModePerm)
