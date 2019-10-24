@@ -34,7 +34,7 @@ func CreateAssembler(speed uint, total uint64, path string) *Assembler {
 	//go observer.Start(TotalTransaction)
 
 	assembler := &Assembler{
-		raw:         make(chan *Elements, 1000),
+		raw:         make(chan *infra.Elements, 1000),
 		config:      config,
 		signer:      crypto,
 		proposer:    proposer,
@@ -61,7 +61,7 @@ func CreateAssembler(speed uint, total uint64, path string) *Assembler {
 	return assembler
 }
 
-func (a *Assembler) assemble(e *Elements) *Elements {
+func (a *Assembler) assemble(e *infra.Elements) *infra.Elements {
 	env, err := infra.CreateSignedTx(e.Proposal, a.signer, e.Response)
 	if err != nil {
 		panic(err)
@@ -71,7 +71,7 @@ func (a *Assembler) assemble(e *Elements) *Elements {
 	return e
 }
 
-func (a *Assembler) sign(e *Elements) *Elements {
+func (a *Assembler) sign(e *infra.Elements) *infra.Elements {
 	sprop, err := infra.SignProposal(e.Proposal, a.signer)
 	if err != nil {
 		panic(err)
@@ -119,7 +119,7 @@ func (a *Assembler) Start() {
 					"-1",
 				)
 				seq += 1
-				a.raw <- &Elements{Proposal: prop}
+				a.raw <- &infra.Elements{Proposal: prop}
 			}
 		}
 		speedIndex += 1
