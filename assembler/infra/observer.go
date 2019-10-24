@@ -2,6 +2,7 @@ package infra
 
 import (
 	"fmt"
+	"github.com/hcg1314/stupid/assembler/basic"
 	"time"
 
 	"github.com/hyperledger/fabric/protos/peer"
@@ -13,7 +14,7 @@ type Observer struct {
 	signal chan error
 }
 
-func CreateObserver(node Node, channel string, crypto *Crypto) *Observer {
+func CreateObserver(node basic.Node, channel string, crypto *basic.Crypto) *Observer {
 	deliverer, err := CreateDeliverFilteredClient(node, crypto.TLSCACerts)
 	if err != nil {
 		panic(err)
@@ -36,8 +37,10 @@ func CreateObserver(node Node, channel string, crypto *Crypto) *Observer {
 	return &Observer{d: deliverer, signal: make(chan error, 10)}
 }
 
-func (o *Observer) Start(N uint64, now time.Time) {
+func (o *Observer) Start(N uint64) {
 	defer close(o.signal)
+
+	now := time.Now()
 
 	var n uint64 = 0
 	for n < N {

@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"github.com/hcg1314/stupid/assembler/basic"
 	"time"
 
 	"github.com/hyperledger/fabric/core/comm"
@@ -30,7 +31,7 @@ func CreateGRPCClient(certs [][]byte) (*comm.GRPCClient, error) {
 	return grpcClient, nil
 }
 
-func CreateEndorserClient(node Node, tlscacerts [][]byte) (peer.EndorserClient, error) {
+func CreateEndorserClient(node basic.Node, tlscacerts [][]byte) (peer.EndorserClient, error) {
 	gRPCClient, err := CreateGRPCClient(tlscacerts)
 	if err != nil {
 		return nil, err
@@ -44,7 +45,7 @@ func CreateEndorserClient(node Node, tlscacerts [][]byte) (peer.EndorserClient, 
 	return peer.NewEndorserClient(conn), nil
 }
 
-func CreateBroadcastClient(node Node, tlscacerts [][]byte) (orderer.AtomicBroadcast_BroadcastClient, error) {
+func CreateBroadcastClient(node basic.Node, tlscacerts [][]byte) (orderer.AtomicBroadcast_BroadcastClient, error) {
 	gRPCClient, err := CreateGRPCClient(tlscacerts)
 	if err != nil {
 		return nil, err
@@ -58,7 +59,7 @@ func CreateBroadcastClient(node Node, tlscacerts [][]byte) (orderer.AtomicBroadc
 	return orderer.NewAtomicBroadcastClient(conn).Broadcast(context.Background())
 }
 
-func CreateDeliverFilteredClient(node Node, tlscacerts [][]byte) (peer.Deliver_DeliverFilteredClient, error) {
+func CreateDeliverFilteredClient(node basic.Node, tlscacerts [][]byte) (peer.Deliver_DeliverFilteredClient, error) {
 	gRPCClient, err := CreateGRPCClient(tlscacerts)
 	if err != nil {
 		return nil, err
