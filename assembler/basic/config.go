@@ -2,7 +2,6 @@ package basic
 
 import (
 	"encoding/json"
-	"github.com/hcg1314/stupid/assembler"
 	"io/ioutil"
 
 	"github.com/gogo/protobuf/proto"
@@ -43,24 +42,24 @@ func LoadConfig(f string) *Config {
 
 func (c Config) LoadCrypto() *Crypto {
 	conf := CryptoConfig{
-		assembler.MSPID:      c.MSPID,
-		assembler.PrivKey:    c.PrivateKey,
-		assembler.SignCert:   c.SignCert,
-		assembler.TLSCACerts: c.TLSCACerts,
+		MSPID:      c.MSPID,
+		PrivKey:    c.PrivateKey,
+		SignCert:   c.SignCert,
+		TLSCACerts: c.TLSCACerts,
 	}
 
-	priv, err := GetPrivateKey(assembler.PrivKey)
+	priv, err := GetPrivateKey(conf.PrivKey)
 	if err != nil {
 		panic(err)
 	}
 
-	cert, certBytes, err := GetCertificate(assembler.SignCert)
+	cert, certBytes, err := GetCertificate(conf.SignCert)
 	if err != nil {
 		panic(err)
 	}
 
 	id := &msp.SerializedIdentity{
-		Mspid:   assembler.MSPID,
+		Mspid:   conf.MSPID,
 		IdBytes: certBytes,
 	}
 
@@ -69,15 +68,15 @@ func (c Config) LoadCrypto() *Crypto {
 		panic(err)
 	}
 
-	certs, err := GetTLSCACerts(assembler.TLSCACerts)
+	certs, err := GetTLSCACerts(conf.TLSCACerts)
 	if err != nil {
 		panic(err)
 	}
 
 	return &Crypto{
-		assembler.Creator:    name,
-		assembler.PrivKey:    priv,
-		assembler.SignCert:   cert,
-		assembler.TLSCACerts: certs,
+		Creator:    name,
+		PrivKey:    priv,
+		SignCert:   cert,
+		TLSCACerts: certs,
 	}
 }
