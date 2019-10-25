@@ -60,7 +60,7 @@ func main() {
 
 	go assembler.Start()
 
-
+	assembler.Wait()
 
 	os.Exit(0)
 }

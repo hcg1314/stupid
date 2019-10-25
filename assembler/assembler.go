@@ -28,7 +28,9 @@ func CreateAssembler(speed uint, total uint64, path string) *Assembler {
 	crypto := config.LoadCrypto()
 
 	proposer := infra.CreateProposalDispatcher(config.NumOfConn, config.ClientPerConn, config.Peers, crypto)
+	go proposer.Start()
 	broadcaster := infra.CreateBroadcastDispatcher(config.NumOfConn, config.Orderer, crypto)
+	go broadcaster.Start()
 	observer := infra.CreateObserver(config.Peers[0], config.Channel, crypto) // 先从1个peer观察吧
 
 	//go observer.Start(TotalTransaction)
