@@ -155,5 +155,5 @@ func (a *Assembler) Wait() {
 }
 
 func (a *Assembler) GetInfo() string {
-	return fmt.Sprintf("raw:%10d,signed:%10d,endorsered:%10d",len(a.raw), a.proposer.GetWaitCount(), a.broadcaster.GetWaitCount())
+	return fmt.Sprintf("raw(%d),signed(%d),endorsered(%d)",len(a.raw), a.proposer.GetWaitCount(), a.broadcaster.GetWaitCount())
 }

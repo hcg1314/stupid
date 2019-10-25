@@ -33,6 +33,10 @@ func (p *proposer) Handle(e *Elements) error {
 	return nil
 }
 
+func (p *proposer) GetWait() int {
+	return len(p.signed)
+}
+
 func (p *proposer) Start(processed chan *Elements) {
 	for seq := 0; seq < p.clientNum; seq++ {
 		go p.startProposer(processed)

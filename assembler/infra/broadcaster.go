@@ -30,6 +30,10 @@ func (b *broadcaster) Handle(e *Elements) error {
 	return nil
 }
 
+func (b *broadcaster) GetWait() int {
+	return len(b.envs)
+}
+
 func (b *broadcaster) Start() {
 	go b.startDraining()
 	for {

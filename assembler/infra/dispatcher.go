@@ -15,6 +15,7 @@ type Elements struct {
 
 type Handler interface {
 	Handle(e *Elements) error
+	GetWait() int
 }
 
 type Dispatcher struct {
@@ -87,7 +88,11 @@ func (d *Dispatcher) Send(e *Elements) {
 }
 
 func (d *Dispatcher) GetWaitCount() int {
-	return len(d.input)
+	count := 0
+	for _,h := range d.handlers {
+		count += h.GetWait()
+	}
+	return count
 }
 
 func (d *Dispatcher) GetOutput() chan *Elements {
