@@ -33,8 +33,6 @@ func CreateAssembler(speed uint, total uint64, path string) *Assembler {
 	go broadcaster.Start()
 	observer := infra.CreateObserver(config.Peers[0], config.Channel, crypto) // 先从1个peer观察吧
 
-	//go observer.Start(TotalTransaction)
-
 	assembler := &Assembler{
 		raw:         make(chan *infra.Elements, 1000),
 		config:      config,

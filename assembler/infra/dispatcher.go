@@ -89,12 +89,3 @@ func (d *Dispatcher) Send(e *Elements) {
 func (d *Dispatcher) GetOutput() chan *Elements {
 	return d.output
 }
-
-func (d *Dispatcher) GetStatisticInfo() string {
-	info := "Endorser Statistic:\n" +
-		"\t     Total(     Speed)   Success(     Speed)      Fail(     Speed)\n"
-	/*for _, p := range d.handlers {
-		info += p.GetStatisticInfo()
-	}*/
-	return info
-}

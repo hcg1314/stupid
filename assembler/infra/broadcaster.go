@@ -38,8 +38,10 @@ func (b *broadcaster) Start() {
 			if !ok {
 				return
 			}
+			basic.AddTotal(basic.ItemBroadcast)
 			err := b.c.Send(e.Envelope)
 			if err != nil {
+				basic.AddFail(basic.ItemBroadcast)
 				fmt.Printf("Failed to broadcast env: %s\n", err)
 			}
 		}
@@ -59,9 +61,10 @@ func (b *broadcaster) startDraining() {
 		}
 
 		if res.Status != common.Status_SUCCESS {
+			basic.AddFail(basic.ItemBroadcast)
 			fmt.Printf("Recv errouneous status: %s\n", res.Status)
-			panic("bcast recv err")
+			continue
 		}
-
+		basic.AddSuccess(basic.ItemBroadcast)
 	}
 }

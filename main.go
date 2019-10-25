@@ -22,24 +22,6 @@ func init() {
 	flag.BoolVar(&Help, "h", false, "help messages")
 }
 
-/*func outputStatistic(proposers *assembler.Proposers) {
-	f, err := os.OpenFile("endorser-static.log", os.O_RDWR|os.O_APPEND, os.ModePerm)
-	if err != nil {
-		f, err = os.OpenFile("endorser-static.log", os.O_RDWR|os.O_CREATE, os.ModePerm)
-		if err != nil {
-			f = os.Stdout
-		}
-	}
-	log1 := log.New(f, "", log.LstdFlags)
-	stat := time.NewTicker(time.Second)
-	for {
-		select {
-		case <-stat.C:
-			log1.Println(proposers.GetStatisticInfo())
-		}
-	}
-}*/
-
 func main() {
 	flag.Parse()
 	if Help {
