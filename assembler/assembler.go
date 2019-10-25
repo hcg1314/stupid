@@ -20,7 +20,10 @@ type Assembler struct {
 	observer    *infra.Observer
 
 	total      uint64
+	real       uint64
 	speedSlice []uint
+	stopped    bool
+	done       chan struct{}
 }
 
 func CreateAssembler(speed uint, total uint64, path string) *Assembler {
@@ -41,7 +44,10 @@ func CreateAssembler(speed uint, total uint64, path string) *Assembler {
 		broadcaster: broadcaster,
 		observer:    observer,
 		total:       total,
+		real:        0,
+		stopped:     false,
 		speedSlice:  make([]uint, speedSliceNum),
+		done:        make(chan struct{}),
 	}
 
 	remainder := speed % speedSliceNum
@@ -83,28 +89,26 @@ func (a *Assembler) sign(e *infra.Elements) *infra.Elements {
 
 func (a *Assembler) Start() {
 
-	go a.observer.Start(a.total)
+	go a.observer.Start()
 
 	speedCtrl := time.NewTicker(200 * time.Millisecond)
-	seq := 0
 	speedIndex := 0
-	remainder := a.total
 	for {
 		if speedIndex >= speedSliceNum {
 			speedIndex = 0
 		}
 
-		if remainder == 0 {
+		if a.real == a.total || a.stopped {
+			close(a.done)
 			break
 		}
 
 		select {
 		case <-speedCtrl.C:
-			var i, num uint64 = 0, remainder
+			var i, num uint64 = 0, a.total-a.real
 			if num > uint64(a.speedSlice[speedIndex]) {
 				num = uint64(a.speedSlice[speedIndex])
 			}
-			remainder -= num
 
 			for ; i < num; i++ {
 				prop := infra.CreateProposal(
@@ -112,13 +116,13 @@ func (a *Assembler) Start() {
 					a.config.Channel,
 					a.config.Chaincode,
 					"addFile",
-					fmt.Sprintf("%d", seq),
-					fmt.Sprintf("%d", seq),
+					fmt.Sprintf("%d", a.real),
+					fmt.Sprintf("%d", a.real),
 					"true",
 					"-1",
 					"-1",
 				)
-				seq += 1
+				a.real += 1
 				a.raw <- &infra.Elements{Proposal: prop}
 			}
 		}
@@ -150,10 +154,17 @@ func (a *Assembler) StartIntegrator() {
 	}
 }
 
+func (a *Assembler) Stop() {
+	a.stopped = true
+}
+
 func (a *Assembler) Wait() {
-	a.observer.Wait()
+	<-a.done
+	for a.real != a.observer.GetTxNumOfGotFromPeer() {
+
+	}
 }
 
 func (a *Assembler) GetInfo() string {
-	return fmt.Sprintf("raw(%d),signed(%d),endorsered(%d)",len(a.raw), a.proposer.GetWaitCount(), a.broadcaster.GetWaitCount())
+	return fmt.Sprintf("raw(%10d),signed(%10d),endorsered(%10d)", len(a.raw), a.proposer.GetWaitCount(), a.broadcaster.GetWaitCount())
 }

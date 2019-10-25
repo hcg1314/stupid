@@ -7,6 +7,8 @@ import (
 	"log"
 	"math"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/hcg1314/stupid/assembler"
@@ -46,6 +48,15 @@ func outputInfo(as *assembler.Assembler) {
 	}
 }
 
+func userCtrl(as *assembler.Assembler) {
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGUSR1)
+
+	sig := <-sigs
+	fmt.Println(sig)
+	as.Stop()
+}
+
 func main() {
 	flag.Parse()
 	if Help {
@@ -57,18 +68,19 @@ func main() {
 		return
 	}
 
-	assembler := assembler.CreateAssembler(Speed, TotalTransaction, ConfigFilePath)
+	as := assembler.CreateAssembler(Speed, TotalTransaction, ConfigFilePath)
+	go userCtrl(as)
 
 	for i := 0; i < 5; i++ {
-		go assembler.StartSigner()     // sign proposal
-		go assembler.StartIntegrator() // create signed tx
+		go as.StartSigner()     // sign proposal
+		go as.StartIntegrator() // create signed tx
 	}
 
-	go assembler.Start()
+	go as.Start()
 
-	go outputInfo(assembler)
+	go outputInfo(as)
 
-	assembler.Wait()
+	as.Wait()
 
 	os.Exit(0)
 }

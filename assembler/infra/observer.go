@@ -11,6 +11,7 @@ import (
 type Observer struct {
 	d peer.Deliver_DeliverFilteredClient
 
+	got    uint64
 	signal chan error
 }
 
@@ -34,35 +35,34 @@ func CreateObserver(node basic.Node, channel string, crypto *basic.Crypto) *Obse
 		panic(err)
 	}
 
-	return &Observer{d: deliverer, signal: make(chan error, 10)}
+	return &Observer{
+		d:      deliverer,
+		got:    0,
+		signal: make(chan error, 10),
+	}
 }
 
-func (o *Observer) Start(N uint64) {
+func (o *Observer) Start() {
 	defer close(o.signal)
 
 	now := time.Now()
 
-	var n uint64 = 0
-	for n < N {
+	for  {
 		r, err := o.d.Recv()
 		if err != nil {
 			o.signal <- err
 		}
 
 		fb := r.Type.(*peer.DeliverResponse_FilteredBlock)
-		n = n + uint64(len(fb.FilteredBlock.FilteredTransactions))
+		o.got += uint64(len(fb.FilteredBlock.FilteredTransactions))
 		duration := time.Since(now)
 		fmt.Printf("Time %v\tBlock %d\tTx %d\tTotal %d\ttps: %f\n",
 			duration, fb.FilteredBlock.Number, len(fb.FilteredBlock.FilteredTransactions),
-			n, float64(n)/duration.Seconds(),
-			)
+			o.got, float64(o.got)/duration.Seconds(),
+		)
 	}
 }
 
-func (o *Observer) Wait() {
-	for err := range o.signal {
-		if err != nil {
-			fmt.Printf("Observed error: %s\n", err)
-		}
-	}
+func (o *Observer) GetTxNumOfGotFromPeer() uint64 {
+	return o.got
 }

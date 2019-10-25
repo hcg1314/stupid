@@ -46,7 +46,10 @@ func (p *proposer) Start(processed chan *Elements) {
 func (p *proposer) startProposer(processed chan *Elements) {
 	for {
 		select {
-		case s := <-p.signed:
+		case s,ok := <-p.signed:
+			if !ok {
+				return
+			}
 			basic.AddTotal(basic.ItemProposal)
 			r, err := p.e.ProcessProposal(context.Background(), s.SignedProp)
 			// err不为空时，r会为nil，r.Response会导致panic
