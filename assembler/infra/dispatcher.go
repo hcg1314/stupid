@@ -86,6 +86,10 @@ func (d *Dispatcher) Send(e *Elements) {
 	d.input <- e
 }
 
+func (d *Dispatcher) GetWaitCount() int {
+	return len(d.input)
+}
+
 func (d *Dispatcher) GetOutput() chan *Elements {
 	return d.output
 }

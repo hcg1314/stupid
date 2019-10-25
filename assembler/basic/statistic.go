@@ -2,9 +2,6 @@ package basic
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"time"
 )
 
 const (
@@ -63,17 +60,11 @@ func AddFail(item int) {
 	globalStat.signal <- &sig{item, fail}
 }
 
-func (sh *statHandler) Start() {
-	f, err := os.OpenFile("static.log", os.O_RDWR|os.O_APPEND, os.ModePerm)
-	if err != nil {
-		f, err = os.OpenFile("static.log", os.O_RDWR|os.O_CREATE, os.ModePerm)
-		if err != nil {
-			f = os.Stdout
-		}
-	}
-	log1 := log.New(f, "", log.LstdFlags)
-	stat := time.NewTicker(time.Second)
+func GetInfo() string {
+	return globalStat.GetInfo()
+}
 
+func (sh *statHandler) Start() {
 	for {
 		select {
 		case r := <-sh.signal:
@@ -84,21 +75,26 @@ func (sh *statHandler) Start() {
 			} else {
 				sh.current[r.Item].Fail += 1
 			}
-		case <-stat.C:
-			info := "Endorser Statistic:\n" +
-				"                    Total(     Speed)   Success(     Speed)      Fail(     Speed)\n"
-			for i, curr := range sh.current{
-				last := sh.last[i]
-				info += fmt.Sprintf("%-15s%10d(%10d)%10d(%10d)%10d(%10d)\n",
-					itemDesc[i],
-					curr.Total, curr.Total-last.Total,
-					curr.Success, curr.Success-last.Success,
-					curr.Fail, curr.Fail-last.Fail,
-				)
-			}
-			log1.Println(info)
 		}
 	}
+}
+
+func (sh *statHandler) GetInfo() string {
+	info := "Statistic:\n" +
+		"                    Total(     Speed)   Success(     Speed)      Fail(     Speed)\n"
+	for i, curr := range sh.current{
+		last := &sh.last[i]
+		info += fmt.Sprintf("%-15s%10d(%10d)%10d(%10d)%10d(%10d)\n",
+			itemDesc[i],
+			curr.Total, curr.Total-last.Total,
+			curr.Success, curr.Success-last.Success,
+			curr.Fail, curr.Fail-last.Fail,
+		)
+		last.Copy(curr)
+	}
+	info += fmt.Sprintf("Assembler: %s\n", GetInfo())
+
+	return info
 }
 
 type statItem struct {

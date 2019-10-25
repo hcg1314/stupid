@@ -2,8 +2,11 @@ package main
 
 import (
 	"flag"
+	"github.com/hcg1314/stupid/assembler/basic"
+	"log"
 	"math"
 	"os"
+	"time"
 
 	"github.com/hcg1314/stupid/assembler"
 )
@@ -20,6 +23,26 @@ func init() {
 	flag.UintVar(&Speed, "speed", 0, "the num of transactions generated per second")
 	flag.StringVar(&ConfigFilePath, "path", "", "the path of config file")
 	flag.BoolVar(&Help, "h", false, "help messages")
+}
+
+func outputInfo(as *assembler.Assembler) {
+	f, err := os.OpenFile("static.log", os.O_RDWR|os.O_APPEND, os.ModePerm)
+	if err != nil {
+		f, err = os.OpenFile("static.log", os.O_RDWR|os.O_CREATE, os.ModePerm)
+		if err != nil {
+			f = os.Stdout
+		}
+	}
+	log1 := log.New(f, "", log.LstdFlags)
+	stat := time.NewTicker(time.Second)
+
+	for {
+		select {
+		case <-stat.C:
+			info := basic.GetInfo() + as.GetInfo()
+			log1.Println(info)
+		}
+	}
 }
 
 func main() {
@@ -41,6 +64,8 @@ func main() {
 	}
 
 	go assembler.Start()
+
+	go outputInfo(assembler)
 
 	assembler.Wait()
 
