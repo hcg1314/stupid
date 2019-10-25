@@ -92,7 +92,6 @@ func (sh *statHandler) GetInfo() string {
 		)
 		last.Copy(curr)
 	}
-	info += fmt.Sprintf("Assembler: %s\n", GetInfo())
 
 	return info
 }

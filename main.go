@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/hcg1314/stupid/assembler/basic"
 	"log"
 	"math"
@@ -39,7 +40,7 @@ func outputInfo(as *assembler.Assembler) {
 	for {
 		select {
 		case <-stat.C:
-			info := basic.GetInfo() + as.GetInfo()
+			info := basic.GetInfo() + fmt.Sprintf("Assembler: %s\n",as.GetInfo())
 			log1.Println(info)
 		}
 	}
