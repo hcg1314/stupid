@@ -55,17 +55,20 @@ func (p *proposer) startProposer(processed chan *Elements) {
 			// err不为空时，r会为nil，r.Response会导致panic
 			if err != nil {
 				basic.AddFail(basic.ItemProposal)
+				GlobalObserver.AddFailed()
 				fmt.Printf("Err processing proposal, err: %v\n", err)
 				continue
 			}
 			if r == nil {
 				basic.AddFail(basic.ItemProposal)
+				GlobalObserver.AddFailed()
 				continue
 			}
 			// 消息投递到peer，背书异常，输出具体原因
 			if r.Response.Status < 200 || r.Response.Status >= 400 {
 				fmt.Printf("Err processing proposal: %v, status: %d\n", r.Response.Message, r.Response.Status)
 				basic.AddFail(basic.ItemProposal)
+				GlobalObserver.AddFailed()
 				continue
 			}
 			basic.AddSuccess(basic.ItemProposal)

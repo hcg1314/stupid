@@ -17,7 +17,6 @@ type Assembler struct {
 	signer      *basic.Crypto
 	proposer    *infra.Dispatcher
 	broadcaster *infra.Dispatcher
-	observer    *infra.Observer
 
 	total      uint64
 	real       uint64
@@ -34,7 +33,7 @@ func CreateAssembler(speed uint, total uint64, path string) *Assembler {
 	go proposer.Start()
 	broadcaster := infra.CreateBroadcastDispatcher(config.NumOfConn, config.Orderer, crypto)
 	go broadcaster.Start()
-	observer := infra.CreateObserver(config.Peers[0], config.Channel, crypto) // 先从1个peer观察吧
+	infra.CreateObserver(config.Peers[0], config.Channel, crypto) // 先从1个peer观察吧
 
 	assembler := &Assembler{
 		raw:         make(chan *infra.Elements, 1000),
@@ -42,7 +41,6 @@ func CreateAssembler(speed uint, total uint64, path string) *Assembler {
 		signer:      crypto,
 		proposer:    proposer,
 		broadcaster: broadcaster,
-		observer:    observer,
 		total:       total,
 		real:        0,
 		stopped:     false,
@@ -88,8 +86,6 @@ func (a *Assembler) sign(e *infra.Elements) *infra.Elements {
 }
 
 func (a *Assembler) Start() {
-
-	go a.observer.Start()
 
 	speedCtrl := time.NewTicker(200 * time.Millisecond)
 	speedIndex := 0
@@ -160,8 +156,17 @@ func (a *Assembler) Stop() {
 
 func (a *Assembler) Wait() {
 	<-a.done
-	for a.real != a.observer.GetTxNumOfGotFromPeer() {
 
+	fmt.Println("waiting for all tx committed to ledger...")
+
+	t := time.NewTicker(200 * time.Millisecond)
+	for {
+		select {
+		case <-t.C:
+			if a.real == infra.GlobalObserver.GetTxNumOfObserved() {
+				return
+			}
+		}
 	}
 }
 

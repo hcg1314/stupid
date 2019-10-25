@@ -3,15 +3,20 @@ package infra
 import (
 	"fmt"
 	"github.com/hcg1314/stupid/assembler/basic"
+	"sync"
 	"time"
 
 	"github.com/hyperledger/fabric/protos/peer"
 )
 
+var GlobalObserver *Observer
+
 type Observer struct {
 	d peer.Deliver_DeliverFilteredClient
 
 	got    uint64
+	failed uint64
+	lock sync.RWMutex
 	signal chan error
 }
 
@@ -35,11 +40,16 @@ func CreateObserver(node basic.Node, channel string, crypto *basic.Crypto) *Obse
 		panic(err)
 	}
 
-	return &Observer{
+	GlobalObserver = &Observer{
 		d:      deliverer,
 		got:    0,
+		failed: 0,
 		signal: make(chan error, 10),
 	}
+
+	go GlobalObserver.Start()
+
+	return GlobalObserver
 }
 
 func (o *Observer) Start() {
@@ -63,6 +73,12 @@ func (o *Observer) Start() {
 	}
 }
 
-func (o *Observer) GetTxNumOfGotFromPeer() uint64 {
-	return o.got
+func (o *Observer) AddFailed() {
+	o.lock.Lock()
+	defer o.lock.Unlock()
+	o.failed += 1
+}
+
+func (o *Observer) GetTxNumOfObserved() uint64 {
+	return o.got + o.failed
 }

@@ -46,6 +46,7 @@ func (b *broadcaster) Start() {
 			err := b.c.Send(e.Envelope)
 			if err != nil {
 				basic.AddFail(basic.ItemBroadcast)
+				GlobalObserver.AddFailed()
 				fmt.Printf("Failed to broadcast env: %s\n", err)
 			}
 		}
@@ -66,6 +67,7 @@ func (b *broadcaster) startDraining() {
 
 		if res.Status != common.Status_SUCCESS {
 			basic.AddFail(basic.ItemBroadcast)
+			GlobalObserver.AddFailed()
 			fmt.Printf("Recv errouneous status: %s\n", res.Status)
 			continue
 		}

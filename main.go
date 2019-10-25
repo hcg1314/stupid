@@ -81,6 +81,6 @@ func main() {
 	go outputInfo(as)
 
 	as.Wait()
-
+	fmt.Println("quit")
 	os.Exit(0)
 }
