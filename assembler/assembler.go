@@ -114,9 +114,6 @@ func (a *Assembler) Start() {
 					"addFile",
 					fmt.Sprintf("%d", a.real),
 					fmt.Sprintf("%d", a.real),
-					"true",
-					"-1",
-					"-1",
 				)
 				a.real += 1
 				a.raw <- &infra.Elements{Proposal: prop}
